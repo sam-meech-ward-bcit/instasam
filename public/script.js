@@ -1,8 +1,11 @@
 const postsContainer = document.querySelector("#posts-container")
 
 function createPostElement(post) {
+  const postContainer = document.createElement("div")
+
   const postElement = document.createElement("article")
   postElement.classList.add("post")
+  postContainer.appendChild(postElement)
 
   const postHeader = document.createElement("header")
   postHeader.classList.add("post__header", "post__inset")
@@ -92,7 +95,7 @@ function createPostElement(post) {
   })
 
   postElement.appendChild(form)
-  return postElement
+  return postContainer
 }
 
 function createNewPost(username, imageURL, message) {
