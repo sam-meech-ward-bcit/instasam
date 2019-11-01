@@ -8,71 +8,69 @@ app.use(bodyParser.json())
 
 app.use(cors())
 
-const posts = require("./posts")
+function connect(database) {
+  return new Promise((resolve, reject) => {
 
-app.get('/insta_posts', (req, res) => {
-  res.send(posts)
-})
+    app.get('/insta_posts', async (req, res) => {
+      const posts = await database.posts()
+      res.send(posts)
+    })
 
-app.post('/insta_posts', (req, res) => {
-  const post = req.body.post
-  if (!post || 
-    typeof post !== 'object' || 
-    typeof post.username !== 'string' || 
-    typeof post.message !== 'string' || 
-    typeof post.image_url !== 'string' || 
-    post.username.length === 0 || 
-    post.message.length === 0 || 
-    post.image_url.length === 0 || 
-    typeof post.comments !== 'object'
-    ) {
-    res.status(400)
-    res.send({'error': {message: `invalid post`, post}})
-    return
-  }
-  
+    app.post('/insta_posts', async (req, res) => {
+      const post = req.body.post
+      if (!post || 
+        typeof post !== 'object' || 
+        typeof post.username !== 'string' || 
+        typeof post.message !== 'string' || 
+        typeof post.image_url !== 'string' || 
+        post.username.length === 0 || 
+        post.message.length === 0 || 
+        post.image_url.length === 0 || 
+        typeof post.comments !== 'object'
+        ) {
+        res.status(400)
+        res.send({'error': {message: `invalid post`, post}})
+        return
+      }
 
-  console.log(typeof post )
-console.log(typeof post.username )
-console.log(typeof post.message )
-console.log(typeof post.image_url )
-console.log(typeof post.username.length )
-console.log(typeof post.message.length )
-console.log(typeof post.image_url.length )
-console.log(typeof post.comments )
-  posts.push(post)
-  res.send({message: "success"})
-})
+      await database.savePost(post)
+      res.send({message: "success"})
+    })
 
-app.post('/insta_posts/:postId/comments', (req, res) => {
-  const message = req.body.message
-  const postId = parseInt(req.body.postId)
-  
-  const post = posts.find(post => post.id === postId)
-  if (!post) {
-    res.status(404)
-    res.send({error: {message: `post not found with id ${postId}`}})
-    return
-  }
+    app.post('/insta_posts/:postId/comments', async (req, res) => {
+      const message = req.body.message
+      const postId = req.body.postId
+      
+      const post = await database.findPost(postId)
+      if (!post) {
+        res.status(404)
+        res.send({error: {message: `post not found with id ${postId}`}})
+        return
+      }
+      
+      await database.addComment(postId, message)
 
-  post.comments.push({message})
+      res.send({message: "success"})
+    })
 
-  res.send({message: "success"})
-})
+    app.post('/insta_posts/:postId/likes', async (req, res) => {
+      const postId = req.body.postId
+      
+      const post = await database.findPost(postId)
+      if (!post) {
+        res.status(404)
+        res.send({error: {message: `post not found with id ${postId}`}})
+        return
+      }
 
-app.post('/insta_posts/:postId/likes', (req, res) => {
-  const postId = parseInt(req.body.postId)
-  
-  const post = posts.find(post => post.id === postId)
-  if (!post) {
-    res.status(404)
-    res.send({error: {message: `post not found with id ${postId}`}})
-    return
-  }
+      database.incrementLikeCount(postId)
 
-  post.like_count++
+      res.send({message: "success"})
+    })
 
-  res.send({message: "success"})
-})
-
-app.listen(8080, () => console.log("listening on port 8080"))
+    app.listen(8080, () => {
+      resolve(8080)
+    })
+  })
+}
+exports.connect = connect

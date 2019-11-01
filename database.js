@@ -1,24 +1,67 @@
-const MongoClient = require('mongodb').MongoClient
+const { ObjectId, MongoClient } = require('mongodb')
 const assert = require('assert')
 
 // Connection URL
-const url = 'mongodb://heroku_9p4b2gfl:4eh3oejnejhh185eh0noq9ah0t@ds141248.mlab.com:41248/heroku_9p4b2gfl'
+const url = process.env.MONGODB_URI
  
 // Database Name
 const dbName = 'heroku_9p4b2gfl'
 
-function connect() {
+let db, posts
+
+async function connect() {
+  const client = new MongoClient(url,  { useUnifiedTopology: true })
+
+  await client.connect()
+  db = client.db(dbName)
+  posts = db.collection('insta_posts')
+  return db
+}
+exports.connect = connect
+
+async function getPosts() {
+  const found = await posts.find({}).limit(50).toArray()
+  return found.map(post => {
+    post.id = post._id
+    return post
+  })
+}
+exports.posts = getPosts
+
+async function savePost(post) {
+    return await posts.insertOne(post)
+}
+exports.savePost = savePost
+
+async function findPost(postId) {
+  const objectId = new ObjectId(postId);
+  const found = await posts.find({_id: objectId}).toArray()
+  if (found.length === 0) {
+    throw "No Post with id "+ postId
+  }
+  return found[0]
+}
+exports.findPost = findPost
+
+async function addComment(postId, message) {
+  const post = await findPost(postId)
+  console.log(postId, post)
+  post.comments.push({message})
+  const objectId = new ObjectId(postId);
+  const r = await posts.updateOne({_id: objectId}, {$set: {comments: post.comments}});
+  return r
+}
+exports.addComment = addComment
+
+async function incrementLikeCount(postId) {
   return new Promise((resolve, reject) => {
-    // Use connect method to connect to the server
-    MongoClient.connect(url, function(err, client) {
+    posts.find({}).toArray(function(err, docs) {
       if (err) {
         reject(err)
         return
       }
-      const db = client.db(dbName)
-      resolve(db)
+      resolve(docs)
     })
   })
 }
-exports.connect = connect
- 
+exports.incrementLikeCount = incrementLikeCount
