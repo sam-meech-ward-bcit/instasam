@@ -68,8 +68,9 @@ function connect(database) {
       res.send({message: "success"})
     })
 
-    app.listen(8080, () => {
-      resolve(8080)
+    const port = process.env.PORT || 8080
+    app.listen(port, () => {
+      resolve(port)
     })
   })
 }
