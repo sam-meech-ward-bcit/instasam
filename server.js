@@ -13,12 +13,12 @@ app.use(cors())
 function connect(database) {
   return new Promise((resolve, reject) => {
 
-    app.get('/insta_posts', async (req, res) => {
+    app.get('/api/insta_posts', async (req, res) => {
       const posts = await database.posts()
       res.send(posts)
     })
 
-    app.post('/insta_posts', async (req, res) => {
+    app.post('/api/insta_posts', async (req, res) => {
       const post = req.body.post
       if (!post || 
         typeof post !== 'object' || 
@@ -39,7 +39,7 @@ function connect(database) {
       res.send({message: "success"})
     })
 
-    app.post('/insta_posts/:postId/comments', async (req, res) => {
+    app.post('/api/insta_posts/:postId/comments', async (req, res) => {
       const message = req.body.message
       const postId = req.body.postId
       
@@ -55,7 +55,7 @@ function connect(database) {
       res.send({message: "success"})
     })
 
-    app.post('/insta_posts/:postId/likes', async (req, res) => {
+    app.post('/api/insta_posts/:postId/likes', async (req, res) => {
       const postId = req.body.postId
       
       const post = await database.findPost(postId)
