@@ -135,7 +135,7 @@ function createNewComment(postId, message) {
 
   fetch(`api/insta_posts/${postId}/comments`, {
     method: 'POST',
-    body: JSON.stringify({message, postId}),
+    body: JSON.stringify({message}),
     headers: {
       'Content-Type': 'application/json'
     },
