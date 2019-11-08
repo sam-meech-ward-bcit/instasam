@@ -49,4 +49,4 @@ Replace :postId with the id of the insta post.
 POST https://instasam-one.herokuapp.com/api/insta_posts/:postId/likes
 ```
 
-Replace :postId with the id of the insta post.
+Replace :postId with the id of the insta post.# instasam
