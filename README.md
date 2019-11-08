@@ -1,5 +1,7 @@
 ## Endpoints
 
+All endpoints expect JSON and return JSON. Make sure you set the content-type to JSON, anytime you are POSTing data!.
+
 ### Insta Posts
 
 #### GET all Posts
