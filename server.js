@@ -56,7 +56,7 @@ function connect(database) {
     })
 
     app.post('/api/insta_posts/:postId/likes', async (req, res) => {
-      const postId = req.body.postId
+      const postId = req.params.postId
       
       const post = await database.findPost(postId)
       if (!post) {
