@@ -54,14 +54,14 @@ async function addComment(postId, message) {
 exports.addComment = addComment
 
 async function incrementLikeCount(postId) {
-  return new Promise((resolve, reject) => {
-    posts.find({}).toArray(function(err, docs) {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve(docs)
-    })
-  })
+  const post = await findPost(postId)
+  if (!post.like_count) {
+    post.like_count = 1
+  } else {
+    post.like_count++
+  }
+  const objectId = new ObjectId(postId);
+  const r = await posts.updateOne({_id: objectId}, post);
+  return r
 }
 exports.incrementLikeCount = incrementLikeCount
